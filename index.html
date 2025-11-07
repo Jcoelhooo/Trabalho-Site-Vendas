@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loja Virtual - Produtos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <ul class="menu">
+            <li><a href="index.html" class="active">Produtos</a></li>
+            <li><a href="carrinho.html">Carrinho</a></li>
+            <li><a href="checkout.html">Finalizar Compra</a></li>
+            <li><a href="login.html" id="login-link">Login</a></li>
+            <li><a href="#" id="logout-link" style="display:none;">Sair</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <h1>Nossos Produtos</h1>
+        
+        <form id="produtos-form">
+            <div class="produtos-grid">
+
+                <!-- Produto 1 -->
+                <div class="produto-card">
+                    <img src="img/iphone rosa.png" alt="Produto 1">
+                    <h3>Capinha para IPhone </h3>
+                    <p class="preco">R$ 99,90</p>
+                    <p class="estoque">Estoque: <span class="estoque-valor" data-sku="CASE-IPHN" data-stock="10">10</span></p>
+                    <div class="produto-selecao">
+                        <label>
+                            <input type="checkbox" name="prod1" value="sim">
+                            Adicionar ao Carrinho
+                        </label>
+                        <select name="qtd1"></select>
+                    </div>
+                </div>
+
+                <!-- Produto 2 -->
+                <div class="produto-card">
+                    <img src="img/magsafe.png" alt="Produto 2">
+                    <h3>Carregador MagSafe</h3>
+                    <p class="preco">R$ 500,90</p>
+                    <p class="estoque">Estoque: <span class="estoque-valor" data-sku="MGSF-15W" data-stock="15">15</span></p>
+                    <div class="produto-selecao">
+                        <label>
+                            <input type="checkbox" name="prod2" value="sim">
+                            Adicionar ao Carrinho
+                        </label>
+                        <select name="qtd2"></select>
+                    </div>
+                </div>
+
+                <!-- Produto 3 -->
+                <div class="produto-card">
+                    <img src="img/iphone.png" alt="Produto 3">
+                    <h3>IPhone 15</h3>
+                    <p class="preco">R$ 5.000,90</p>
+                    <p class="estoque">Estoque: <span class="estoque-valor" data-sku="IPHN-15-PNK" data-stock="5">5</span></p>
+                    <div class="produto-selecao">
+                        <label>
+                            <input type="checkbox" name="prod3" value="sim">
+                            Adicionar ao Carrinho
+                        </label>
+                        <select name="qtd3"></select>
+                    </div>
+                </div>
+
+                <!-- Produto 4 -->
+                <div class="produto-card">
+                    <img src="img/aplewatch.png" alt="Produto 4">
+                    <h3>Apple Watch</h3>
+                    <p class="preco">R$ 2.500,90</p>
+                    <p class="estoque">Estoque: <span class="estoque-valor" data-sku="APWT-S9" data-stock="8">8</span></p>
+                    <div class="produto-selecao">
+                        <label>
+                            <input type="checkbox" name="prod4" value="sim">
+                            Adicionar ao Carrinho
+                        </label>
+                        <select name="qtd4"></select>
+                    </div>
+                </div>
+
+                <!-- Produto 5 -->
+                <div class="produto-card">
+                    <img src="img/airpods.png" alt="Produto 5">
+                    <h3>AirPods</h3>
+                    <p class="preco">R$ 999,90</p>
+                    <p class="estoque">Estoque: <span class="estoque-valor" data-sku="AIRP-3RD" data-stock="12">12</span></p>
+                    <div class="produto-selecao">
+                        <label>
+                            <input type="checkbox" name="prod5" value="sim">
+                            Adicionar ao Carrinho
+                        </label>
+                        <select name="qtd5"></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="carrinho-preview">
+                <h3>Resumo do Carrinho</h3>
+                <p>Itens: <span id="total-itens">0</span></p>
+                <p>Total: R$ <span id="total-valor">0,00</span></p>
+                <button type="submit" class="btn-ir-carrinho" disabled>Ir para o Carrinho</button>
+            </div>
+        </form>
+    </main>
+
+<script>
+const API_BASE = 'http://localhost:3001';
+
+function getAuthToken(){ return localStorage.getItem('jwt_token'); }
+
+// Função para inicializar selects com valores padrão (autônomo)
+function inicializarSelectsComValoresPadrao() {
+    console.log('🔄 Inicializando selects com valores padrão...');
+    const spans = document.querySelectorAll('.estoque-valor');
+    
+    for(const span of spans){
+        const sku = span.dataset.sku;
+        const stockPadrao = parseInt(span.dataset.stock) || 10; // Valor padrão se não tiver data-stock
+        
+        if (!sku) continue;
+        
+        const card = span.closest('.produto-card');
+        if (!card) continue;
+        
+        const select = card.querySelector('select');
+        const checkbox = card.querySelector('input[type="checkbox"]');
+        
+        if (!select || !checkbox) continue;
+        
+        // Define o estoque padrão no span
+        span.textContent = stockPadrao;
+        
+        // Limpa e popula o select
+        select.innerHTML = '';
+        const max = Math.min(5, stockPadrao);
+        
+        for(let i = 0; i <= max; i++){
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = i;
+            select.appendChild(opt);
+        }
+        
+        // Habilita select e checkbox
+        select.disabled = false;
+        checkbox.disabled = false;
+        select.value = "0";
+        checkbox.checked = false;
+        
+        console.log(`✅ Select inicializado para ${sku} com estoque padrão: ${stockPadrao}`);
+    }
+    
+    console.log('✅ Inicialização autônoma concluída');
+}
+
+// Função para tentar atualizar estoque do backend (opcional)
+async function atualizarEstoqueDoBackend(){
+    console.log('🔄 Tentando atualizar estoque do backend...');
+    const spans = document.querySelectorAll('.estoque-valor');
+    const token = getAuthToken();
+    
+    if (!token) {
+        console.warn('⚠️ Token não encontrado. Usando valores padrão.');
+        return;
+    }
+    
+    console.log('✅ Token encontrado, tentando atualizar do backend...');
+    
+    for(const span of spans){
+        const sku = span.dataset.sku;
+        if (!sku) continue;
+        
+        try{
+            const url = `${API_BASE}/api/stock?sku=${encodeURIComponent(sku)}`;
+            const r = await fetch(url, {
+                headers:{ 
+                    'Authorization':'Bearer '+ token,
+                    'Content-Type':'application/json'
+                }
+            });
+
+            // Se token inválido, apenas avisa mas não bloqueia
+            if (r.status === 401 || r.status === 403) {
+                console.warn(`⚠️ Token inválido para ${sku}, usando valor padrão`);
+                continue;
+            }
+
+            if(!r.ok) {
+                console.warn(`⚠️ Erro ao buscar estoque para ${sku} (${r.status}), usando valor padrão`);
+                continue;
+            }
+
+            const data = await r.json();
+            
+            if (data && typeof data.stock === 'number') {
+                const stock = data.stock;
+                span.textContent = stock;
+                
+                const card = span.closest('.produto-card');
+                if (card) {
+                    const select = card.querySelector('select');
+                    const checkbox = card.querySelector('input[type="checkbox"]');
+                    
+                    if (select && checkbox) {
+                        // Atualiza as opções do select
+                        select.innerHTML = '';
+                        const max = Math.min(5, stock);
+                        
+                        for(let i = 0; i <= max; i++){
+                            const opt = document.createElement('option');
+                            opt.value = i;
+                            opt.textContent = i;
+                            select.appendChild(opt);
+                        }
+                        
+                        // Mantém o valor atual se ainda for válido
+                        if (Number(select.value) > max) {
+                            select.value = "0";
+                            checkbox.checked = false;
+                        }
+                        
+                        // Habilita/desabilita baseado no estoque
+                        if(stock > 0){
+                            select.disabled = false;
+                            checkbox.disabled = false;
+                        } else {
+                            select.disabled = true;
+                            checkbox.disabled = true;
+                            select.value = "0";
+                            checkbox.checked = false;
+                        }
+                        
+                        console.log(`✅ Estoque atualizado do backend para ${sku}: ${stock}`);
+                    }
+                }
+            }
+        }catch(e){
+            // Em caso de erro, apenas avisa mas não bloqueia
+            console.warn(`⚠️ Erro ao atualizar estoque para ${sku} do backend, usando valor padrão:`, e.message);
+        }
+    }
+    
+    console.log('✅ Tentativa de atualização do backend concluída');
+}
+
+
+// Verifica autenticação e configura logout
+(function checkAuth(){
+    const token = getAuthToken();
+    if(!token) {
+        console.error('❌ Token não encontrado no localStorage');
+        window.location.href='login.html';
+        return;
+    }
+    
+    console.log('✅ Token encontrado no localStorage:', token.substring(0, 30) + '...');
+    
+    const logoutLink = document.getElementById('logout-link');
+    if (logoutLink) {
+        logoutLink.style.display='block';
+        logoutLink.addEventListener('click', e=>{
+            e.preventDefault();
+            console.log('🚪 Logout realizado');
+            localStorage.clear();
+            location.href='login.html';
+        });
+    } else {
+        console.warn('⚠️ Link de logout não encontrado');
+    }
+})();
+
+function atualizarResumo(){
+    let totalItens = 0, totalValor = 0;
+    document.querySelectorAll('.produto-card').forEach((card)=>{
+        const check = card.querySelector('input[type="checkbox"]');
+        const sel = card.querySelector('select');
+        if(check && sel && check.checked && Number(sel.value) > 0){
+            const qtd = Number(sel.value);
+            totalItens += qtd;
+            const precoText = card.querySelector('.preco')?.textContent || '0';
+            const preco = parseFloat(precoText.replace(/[^\d,]/g,'').replace(',','.')) || 0;
+            totalValor += preco * qtd;
+        }
+    });
+    document.getElementById('total-itens').textContent = totalItens;
+    document.getElementById('total-valor').textContent = totalValor.toFixed(2);
+    const btnCarrinho = document.querySelector('.btn-ir-carrinho');
+    if (btnCarrinho) {
+        btnCarrinho.disabled = totalItens === 0;
+    }
+}
+
+// Adiciona eventos após o DOM estar pronto
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('📄 DOM carregado, configurando eventos...');
+    
+    // Adiciona eventos para checkbox e select
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    const selects = document.querySelectorAll('select');
+    
+    console.log(`✅ Encontrados ${checkboxes.length} checkboxes e ${selects.length} selects`);
+    
+    checkboxes.forEach(elem => {
+        elem.addEventListener('change', function() {
+            console.log('🔘 Checkbox alterado:', this.checked);
+            // Sincroniza checkbox e select
+            const card = this.closest('.produto-card');
+            if (card) {
+                const check = card.querySelector('input[type="checkbox"]');
+                const sel = card.querySelector('select');
+                
+                // Se desmarcou, zera o select
+                if (!this.checked && sel) {
+                    sel.value = "0";
+                    console.log('🔘 Checkbox desmarcado, select zerado');
+                }
+                // Se marcou e select está em 0, coloca em 1
+                else if (this.checked && sel && sel.value === "0") {
+                    sel.value = "1";
+                    console.log('🔘 Checkbox marcado, select definido para 1');
+                }
+            }
+            atualizarResumo();
+        });
+    });
+    
+    selects.forEach(elem => {
+        elem.addEventListener('change', function() {
+            console.log('📋 Select alterado:', this.value, 'disabled:', this.disabled);
+            // Sincroniza checkbox e select
+            const card = this.closest('.produto-card');
+            if (card) {
+                const check = card.querySelector('input[type="checkbox"]');
+                
+                // Se select mudou para 0, desmarca checkbox
+                if (check && this.value === "0") {
+                    check.checked = false;
+                    console.log('📋 Select zerado, checkbox desmarcado');
+                }
+                // Se select mudou para > 0, marca checkbox
+                else if (check && Number(this.value) > 0) {
+                    check.checked = true;
+                    console.log('📋 Select > 0, checkbox marcado');
+                }
+            }
+            atualizarResumo();
+        });
+    });
+    
+    // Inicializa selects imediatamente com valores padrão (autônomo)
+    inicializarSelectsComValoresPadrao();
+    atualizarResumo();
+    
+    // Tenta atualizar do backend em segundo plano (opcional)
+    atualizarEstoqueDoBackend().then(() => {
+        atualizarResumo();
+    }).catch(err => {
+        console.warn('⚠️ Não foi possível atualizar do backend, usando valores padrão:', err);
+    });
+    
+    // Intercepta o submit do formulário para salvar no localStorage
+    document.getElementById('produtos-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const carrinho = {};
+        const produtos = [
+            { id: 1, nome: 'Capinha para IPhone', preco: 99.90, sku: 'CASE-IPHN' },
+            { id: 2, nome: 'Carregador MagSafe', preco: 500.90, sku: 'MGSF-15W' },
+            { id: 3, nome: 'IPhone 15', preco: 5000.90, sku: 'IPHN-15-PNK' },
+            { id: 4, nome: 'Apple Watch', preco: 2500.90, sku: 'APWT-S9' },
+            { id: 5, nome: 'AirPods', preco: 999.90, sku: 'AIRP-3RD' }
+        ];
+        
+        produtos.forEach(produto => {
+            const checkbox = document.querySelector(`input[name="prod${produto.id}"]`);
+            const select = document.querySelector(`select[name="qtd${produto.id}"]`);
+            
+            if (checkbox && select) {
+                const selecionado = checkbox.checked;
+                const quantidade = parseInt(select.value) || 0;
+                
+                if (selecionado && quantidade > 0) {
+                    carrinho[`prod${produto.id}`] = {
+                        selecionado: true,
+                        quantidade: quantidade,
+                        nome: produto.nome,
+                        preco: produto.preco,
+                        sku: produto.sku
+                    };
+                }
+            }
+        });
+        
+        // Salva no localStorage
+        localStorage.setItem('carrinho', JSON.stringify(carrinho));
+        console.log('✅ Carrinho salvo no localStorage:', carrinho);
+        
+        // Redireciona para o carrinho
+        window.location.href = 'carrinho.html';
+    });
+});
+
+</script>
+</body>
+</html>

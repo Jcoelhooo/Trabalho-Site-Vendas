@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Loja Virtual</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 5rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .login-container h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #2c3e50;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-login:hover {
+            background-color: #219a52;
+        }
+        
+        .btn-login:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .error-message {
+            background-color: #fee;
+            color: #c33;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .error-message code {
+            background-color: rgba(0,0,0,0.1);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .success-message {
+            background-color: #efe;
+            color: #3c3;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .credentials-info {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e0e0e0;
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+        
+        .credentials-info p {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .btn-open-register {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-open-register:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 1rem;
+        }
+
+        .btn-register:hover {
+            background-color: #219a52;
+        }
+
+        .btn-register:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        /* Estilos do Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            overflow: auto;
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: white;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 500px;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close {
+            position: absolute;
+            right: 1rem;
+            top: 0.5rem;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .modal h2 {
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul class="menu">
+            <li><a href="index.html">Produtos</a></li>
+            <li><a href="login.html" class="active">Login</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div class="login-container">
+            <h1>Login</h1>
+            
+            <div id="login-error-message" class="error-message"></div>
+            <div id="login-success-message" class="success-message"></div>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-username">Login:</label>
+                    <input type="text" id="login-username" name="login" value="admin" required autocomplete="username" pattern="[a-zA-Z0-9]{3,50}" title="Login deve ter entre 3 e 50 caracteres (apenas letras e números)">
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Senha:</label>
+                    <input type="password" id="login-password" name="password" value="123" required autocomplete="current-password" minlength="3">
+                </div>
+                
+                <button type="submit" class="btn-login" id="btn-login">Entrar</button>
+            </form>
+
+            <div class="register-link">
+                <button class="btn-open-register" id="btn-open-register">Registre-se</button>
+            </div>
+
+            <div class="credentials-info">
+                <p style="color: #666; font-size: 0.9rem;">
+                    🔐 Credenciais padrão já preenchidas<br>
+                    <small>Basta clicar em "Entrar"</small>
+                </p>
+            </div>
+        </div>
+
+        <!-- Modal de Cadastro -->
+        <div id="register-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="close-modal">&times;</span>
+                <h2>Cadastre-se</h2>
+                
+                <div id="register-error-message" class="error-message"></div>
+                <div id="register-success-message" class="success-message"></div>
+                
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="register-login">Login:</label>
+                        <input type="text" id="register-login" name="login" required autocomplete="username" pattern="[a-zA-Z0-9]{3,50}" title="Login deve ter entre 3 e 50 caracteres (apenas letras e números)">
+                        <small style="color: #666; font-size: 0.85rem;">3-50 caracteres, apenas letras e números</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="register-name">Nome:</label>
+                        <input type="text" id="register-name" name="name" autocomplete="name">
+                        <small style="color: #666; font-size: 0.85rem;">Opcional</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="register-email">Email:</label>
+                        <input type="email" id="register-email" name="email" autocomplete="email">
+                        <small style="color: #666; font-size: 0.85rem;">Opcional</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-password">Senha:</label>
+                        <input type="password" id="register-password" name="password" required minlength="3" autocomplete="new-password">
+                        <small style="color: #666; font-size: 0.85rem;">Mínimo de 3 caracteres</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="register-confirm-password">Confirmar Senha:</label>
+                        <input type="password" id="register-confirm-password" name="confirmPassword" required minlength="3" autocomplete="new-password">
+                    </div>
+                    
+                    <button type="submit" class="btn-register" id="btn-register">Cadastrar</button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const API_BASE = 'http://localhost:3001';
+        
+        // Verifica se está sendo aberto via file:// (não funciona por CORS)
+        function checkFileProtocol() {
+            if (window.location.protocol === 'file:') {
+                const errorDiv = document.getElementById('login-error-message');
+                errorDiv.innerHTML = '⚠️ <strong>AVISO IMPORTANTE:</strong><br><br>' +
+                    'Esta página não pode ser aberta diretamente (file://).<br><br>' +
+                    '<strong>🔧 Para resolver:</strong><br>' +
+                    '1. Use <strong>Live Server</strong> no VS Code (extensão)<br>' +
+                    '2. Ou use um servidor HTTP local<br>' +
+                    '3. Ou execute: <code>python -m http.server 5500</code><br>' +
+                    '4. Depois acesse: <code>http://localhost:5500/login.html</code>';
+                errorDiv.style.display = 'block';
+                document.getElementById('btn-login').disabled = true;
+                return true;
+            }
+            return false;
+        }
+        
+        // Verifica se já está logado
+        function checkAuth() {
+            const token = localStorage.getItem('jwt_token');
+            if (token) {
+                window.location.href = 'index.html';
+            }
+        }
+        
+        // Função para verificar se o servidor está online
+        async function checkServer() {
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ login: 'teste', password: 'teste' })
+                });
+                return response.ok || response.status === 401; // 401 significa que o servidor está online, mas credenciais inválidas
+            } catch (error) {
+                return false;
+            }
+        }
+        
+        // Função para mostrar mensagem de erro
+        function showError(message, type = 'login') {
+            const errorDiv = document.getElementById(`${type}-error-message`);
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById(`${type}-success-message`).style.display = 'none';
+        }
+        
+        // Função para mostrar mensagem de sucesso
+        function showSuccess(message, type = 'login') {
+            const successDiv = document.getElementById(`${type}-success-message`);
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            document.getElementById(`${type}-error-message`).style.display = 'none';
+        }
+        
+        // Função para fazer login
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const login = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            const btnLogin = document.getElementById('btn-login');
+            
+            if (!login || login.length < 3) {
+                showError('O login deve ter no mínimo 3 caracteres', 'login');
+                return;
+            }
+            
+            btnLogin.disabled = true;
+            btnLogin.textContent = 'Verificando servidor...';
+            
+            // Verifica se o servidor está online
+            const isServerOnline = await checkServer();
+            if (!isServerOnline) {
+                showError('❌ O servidor não está respondendo.\n\nVerifique se:\n1. O backend está rodando (npm run dev)\n2. A porta 3001 está disponível\n3. Não há outros serviços usando a mesma porta');
+                btnLogin.disabled = false;
+                btnLogin.textContent = 'Entrar';
+                return;
+            }
+            
+            btnLogin.textContent = 'Entrando...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ login, password })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Credenciais inválidas');
+                }
+                
+                localStorage.setItem('jwt_token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                
+                showSuccess('Login realizado com sucesso! Redirecionando...', 'login');
+                
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+                
+            } catch (error) {
+                showError(error.message, 'login');
+                
+            } finally {
+                btnLogin.disabled = false;
+                btnLogin.textContent = 'Entrar';
+            }
+        }
+
+        // Controle do Modal de Cadastro
+        const modal = document.getElementById('register-modal');
+        const btnOpenRegister = document.getElementById('btn-open-register');
+        const closeModal = document.getElementById('close-modal');
+
+        btnOpenRegister.onclick = () => {
+            modal.style.display = 'block';
+            document.getElementById('register-form').reset();
+            document.getElementById('register-error-message').style.display = 'none';
+            document.getElementById('register-success-message').style.display = 'none';
+        };
+
+        closeModal.onclick = () => {
+            modal.style.display = 'none';
+        };
+
+        window.onclick = (event) => {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        };
+
+        // Função para fazer cadastro
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            const login = document.getElementById('register-login').value.trim();
+            const name = document.getElementById('register-name').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            const btnRegister = document.getElementById('btn-register');
+            
+            // Validação básica
+            if (!login || !password || !confirmPassword) {
+                showError('Login e senha são obrigatórios', 'register');
+                return;
+            }
+
+            if (login.length < 3 || login.length > 50) {
+                showError('O login deve ter entre 3 e 50 caracteres', 'register');
+                return;
+            }
+
+            // Validação de login (apenas letras e números)
+            if (!/^[a-zA-Z0-9]+$/.test(login)) {
+                showError('O login deve conter apenas letras e números', 'register');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('As senhas não coincidem', 'register');
+                return;
+            }
+
+            if (password.length < 3) {
+                showError('A senha deve ter no mínimo 3 caracteres', 'register');
+                return;
+            }
+
+            btnRegister.disabled = true;
+            btnRegister.textContent = 'Verificando servidor...';
+            
+            const isServerOnline = await checkServer();
+            if (!isServerOnline) {
+                showError('❌ O servidor não está respondendo. Verifique se o backend está rodando.', 'register');
+                btnRegister.disabled = false;
+                btnRegister.textContent = 'Cadastrar';
+                return;
+            }
+            
+            btnRegister.textContent = 'Cadastrando...';
+            
+            try {
+                const body = { login, password };
+                if (name) body.name = name;
+                if (email) body.email = email;
+
+                const response = await fetch(`${API_BASE}/api/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(body)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Erro ao cadastrar usuário');
+                }
+                
+                showSuccess('✅ Cadastro realizado com sucesso! Você já pode fazer login.', 'register');
+                document.getElementById('register-form').reset();
+                
+                // Fecha o modal após 2 segundos
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    // Preenche o login no formulário de login
+                    document.getElementById('login-username').value = login;
+                    document.getElementById('login-password').value = '';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Erro ao cadastrar:', error);
+                showError(error.message || 'Erro ao cadastrar usuário. Tente novamente.', 'register');
+            } finally {
+                btnRegister.disabled = false;
+                btnRegister.textContent = 'Cadastrar';
+            }
+        }
+
+        // Event listeners
+        document.getElementById('login-form').addEventListener('submit', handleLogin);
+        document.getElementById('register-form').addEventListener('submit', handleRegister);
+        
+        // Verificações iniciais
+        if (!checkFileProtocol()) {
+            checkAuth();
+            // Verifica status do servidor ao carregar a página
+            checkServer().then(isOnline => {
+                if (!isOnline) {
+                    showError('❌ O servidor não está respondendo. Certifique-se de que o backend está rodando.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
+

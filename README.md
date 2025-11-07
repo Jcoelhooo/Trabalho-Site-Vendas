@@ -16,7 +16,18 @@ JWT + Middleware → O backend gera um token no login e o middleware valida nas 
 
 Bearer Token → O token é enviado no header para acessar as rotas protegidas.
 
-📁 SITEVENDAS/ │ ├── 📁 .github/workflows/ │ └── deploy.yml │ ├── 📁 .vscode/ │ └── settings.json │ ├── 📁 backend/ │ ├── 📁 data/ │ ├── 📁 src/ │ ├── .env │ ├── package-lock.json │ ├── package.json │ ├── tsconfig.json │ ├── 📁 img/ │ │ ├── carrinho.html ├── checkout.html ├── index.html ├── login.html ├── styles.css │ └── settings.json
+📁 SITEVENDAS/ │ ├── 📁 .github/workflows/ │ └── deploy.yml
+│ ├── 📁 .vscode/ │ └── settings.json │ ├── 📁 backend/ │ ├── 📁 data/ │ ├── 📁 src/
+│ ├── .env
+│ ├── package-lock.json
+│ ├── package.json
+│ ├── tsconfig.json
+│ ├── 📁 img/ │ │ ├── carrinho.html
+├── checkout.html
+├── index.html
+├── login.html
+├── styles.css
+│ └── settings.json
 
 ⚡ Como Rodar 1️⃣ Backend cd backend npm install npm start
 
